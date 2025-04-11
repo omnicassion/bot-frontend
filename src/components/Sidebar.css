@@ -1,0 +1,33 @@
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background-color: #1a202c; /* Darker background */
+  color: #edf2f7; /* Lighter text color */
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav-item {
+  margin-bottom: 10px;
+}
+
+.sidebar-nav-item a {
+  color: #edf2f7; /* Lighter text color */
+  text-decoration: none;
+  display: block;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease, color 0.2s ease; /* Smooth transition for color too */
+}
+
+.sidebar-nav-item a:hover {
+  background-color: #2d3748; /* Slightly lighter background on hover */
+  color: #fff; /* White text on hover */
+}

@@ -12,8 +12,8 @@ import Home from './components/Home';
 function App() {
   return (
     <Routes>
-     
-<Route path="/" element={<Home />}>
+     <Route path="/" element={<Home />} />
+
       {/* Protected Routes under Layout */}
       <Route element={<Layout />}>
        {/* Public Route */}

@@ -7,12 +7,13 @@ import Report from './components/Report';
 import ReportAnalysis from './components/ReportAnalysis';
 import MachineStatus from './components/MachineStatus';
 import MachineStatusViewOnly from './components/MachineStatusViewOnly';
+import Home from './components/Home';
 
 function App() {
   return (
     <Routes>
      
-
+<Route path="/" element={<Home />}>
       {/* Protected Routes under Layout */}
       <Route element={<Layout />}>
        {/* Public Route */}

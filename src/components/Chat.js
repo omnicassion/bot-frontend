@@ -53,7 +53,7 @@ const [currentUtterance, setCurrentUtterance] = useState(null);
     setNewMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chat/message', {
+      const response = await axios.post('https://bot-backend-cy89.onrender.com/api/chat/message', {
         userId,
         message: newMessage,
       });

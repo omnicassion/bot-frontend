@@ -12,7 +12,7 @@ const MachineStatus = () => {
 
   const fetchMachines = async () => {
   try {
-    const response = await fetch('http://localhost:5000/api/machines/get');
+    const response = await fetch('https://bot-backend-cy89.onrender.com/api/machines/get');
     const data = await response.json();
 
     if (Array.isArray(data)) {
@@ -37,7 +37,7 @@ const MachineStatus = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch('http://localhost:5000/api/machines/create', {
+      await fetch('https://bot-backend-cy89.onrender.com/api/machines/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ const MachineStatus = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await fetch(`http://localhost:5000/api/machines/${id}/status`, {
+      await fetch(`https://bot-backend-cy89.onrender.com/api/machines/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ const MachineStatus = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this machine?')) return;
     try {
-      await fetch(`http://localhost:5000/api/machines/${id}`, {
+      await fetch(`https://bot-backend-cy89.onrender.com/api/machines/${id}`, {
         method: 'DELETE',
       });
       fetchMachines();

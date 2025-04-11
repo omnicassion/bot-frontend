@@ -11,7 +11,7 @@ const ReportAnalysis = () => {
 
   const fetchAnalysis = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/analyze/${userId}`);
+      const response = await axios.get(`https://bot-backend-cy89.onrender.com/api/analyze/${userId}`);
       setAnalysis(response.data.analysis);
     } catch (err) {
       setError('Failed to fetch analysis.');

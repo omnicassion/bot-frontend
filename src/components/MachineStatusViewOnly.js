@@ -5,7 +5,7 @@ const MachineStatusViewOnly = () => {
 
   const fetchMachines = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/machines/get');
+      const response = await fetch('https://bot-backend-cy89.onrender.com/api/machines/get');
       const data = await response.json();
       if (Array.isArray(data)) {
         setMachines(data);

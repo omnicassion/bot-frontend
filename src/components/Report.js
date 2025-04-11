@@ -15,7 +15,7 @@ const loginResponse = JSON.parse(localStorage.getItem('loginResponse'));
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/generate/${userId}`);
+        const res = await axios.get(`https://bot-backend-cy89.onrender.com/api/generate/${userId}`);
         setReport(res.data.report);
       } catch (err) {
         console.error('Error loading report:', err);

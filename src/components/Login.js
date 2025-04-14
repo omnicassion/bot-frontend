@@ -12,10 +12,10 @@ function Login() {
     e.preventDefault();
 
     const endpoint = isRegistering
-      // ? 'https://bot-backend-cy89.onrender.com/api/auth/register'
-      ? 'http://localhost:5000/api/auth/register'
-      // : 'https://bot-backend-cy89.onrender.com/api/auth/login';
-      : 'http://localhost:5000/api/auth/login';
+       ? 'https://bot-backend-cy89.onrender.com/api/auth/register'
+      //? 'http://localhost:5000/api/auth/register'
+       : 'https://bot-backend-cy89.onrender.com/api/auth/login';
+      //: 'http://localhost:5000/api/auth/login';
 
     try {
       const response = await fetch(endpoint, {

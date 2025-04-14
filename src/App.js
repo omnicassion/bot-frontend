@@ -8,10 +8,15 @@ import ReportAnalysis from './components/ReportAnalysis';
 import MachineStatus from './components/MachineStatus';
 import MachineStatusViewOnly from './components/MachineStatusViewOnly';
 import Home from './components/Home';
+import AdminDashboard from './components/AdminDashboard';
+import UserTable from './components/UserTable';
 
 function App() {
   return (
     <Routes>
+      <Route path="/AdminDashboard" element={<AdminDashboard />} />
+      <Route path="/UserTable" element={<UserTable />} />
+
      <Route path="/" element={<Home />} />
 
       {/* Protected Routes under Layout */}

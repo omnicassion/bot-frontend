@@ -12,35 +12,37 @@ function Login() {
     e.preventDefault();
 
     const endpoint = isRegistering
-       ? 'https://bot-backend-cy89.onrender.com/api/auth/register'
-      //? 'http://localhost:5000/api/auth/register'
-       : 'https://bot-backend-cy89.onrender.com/api/auth/login';
-      //: 'http://localhost:5000/api/auth/login';
+      ? 'https://bot-backend-cy89.onrender.com/api/auth/register'
+      : 'https://bot-backend-cy89.onrender.com/api/auth/login';
 
     try {
+      const bodyData = isRegistering
+        ? { username, password, email }
+        : { username, password };
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password, email}),
+        body: JSON.stringify(bodyData),
       });
 
       const data = await response.json();
-      console.log(data,"data")
+      console.log(data, "data");
 
       if (response.ok) {
         localStorage.setItem('loginResponse', JSON.stringify({
           id: data.id,
           username: data.username,
-          email: data.username,
-          role: data.role
+          email: data.email || '',  // <-- fallback if email is missing
+          role: data.role,
         }));
-        if(data.role==="admin"){
-          navigate("/adminDashboard")
-        }else{
-        navigate('/chat');
 
+        if (data.role === "admin") {
+          navigate("/adminDashboard");
+        } else {
+          navigate("/chat");
         }
       } else {
         console.log('Response:', data);
@@ -60,14 +62,16 @@ function Login() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-           {isRegistering?<input
-            type="email"
-            placeholder="Enter your Email"
-            value={email}
-            required
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-          />:""}
+          {isRegistering && (
+            <input
+              type="email"
+              placeholder="Enter your Email"
+              value={email}
+              required
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            />
+          )}
           <input
             type="text"
             placeholder="Username"
@@ -85,8 +89,6 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
           />
-         
-          
 
           <button
             type="submit"

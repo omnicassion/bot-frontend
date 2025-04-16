@@ -7,7 +7,8 @@ function AdminDashboard() {
 
     const getAllData=async()=>{
         try {
-            const dataaa=await axios.get(`https://bot-backend-cy89.onrender.com/api/adminRoute/adminCount`)
+            // const dataaa=await axios.get(`https://bot-backend-cy89.onrender.com/api/adminRoute/adminCount`)
+            const dataaa=await axios.get(`http://localhost:5000/api/adminRoute/adminCount`)
             console.log(dataaa)
             setData(dataaa.data)
         } catch (error) {

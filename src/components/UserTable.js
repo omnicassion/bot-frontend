@@ -6,7 +6,8 @@ function UserTable() {
 
   const getAllData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/adminRoute/userData`);
+      // const response = await axios.get(`http://localhost:5000/api/adminRoute/userData`);
+      const response = await axios.get(`https://bot-backend-cy89.onrender.com/api/adminRoute/userData`);
       setData(response.data);
     } catch (error) {
       console.log(error);
@@ -19,7 +20,7 @@ function UserTable() {
 
   const updateDataRole = async (id, newRole) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/adminRoute/updateRole/${id}`, {
+      const response = await axios.put(`https://bot-backend-cy89.onrender.com/api/adminRoute/updateRole/${id}`, {
         role: newRole,
       });
       console.log("Updated role:", response.data);

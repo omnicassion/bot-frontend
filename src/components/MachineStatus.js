@@ -6,6 +6,7 @@ const MachineStatus = () => {
   const [status, setStatus] = useState('Offline');
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState('');
+  const [error, setError] = useState(null);
 
   const tokenData = JSON.parse(localStorage.getItem('loginResponse'));
   const userRole = tokenData?.role;
@@ -17,6 +18,7 @@ const MachineStatus = () => {
       setMachines(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching machines:', error);
+      setError('Failed to fetch machine status');
       setMachines([]);
     }
   };
@@ -40,6 +42,7 @@ const MachineStatus = () => {
       fetchMachines();
     } catch (err) {
       console.error('Create failed:', err);
+      setError('Failed to create machine');
     } finally {
       setLoading(false);
     }
@@ -55,6 +58,7 @@ const MachineStatus = () => {
       fetchMachines();
     } catch (err) {
       console.error('Status update failed:', err);
+      setError('Failed to update machine status');
     }
   };
 
@@ -65,6 +69,7 @@ const MachineStatus = () => {
       fetchMachines();
     } catch (err) {
       console.error('Delete failed:', err);
+      setError('Failed to delete machine');
     }
   };
 
@@ -78,61 +83,81 @@ const MachineStatus = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center animate-fadeInUp">
-          Machine Status Panel
-        </h2>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#128C7E] to-[#075E54] text-white px-6 py-4 shadow-lg fixed top-0 right-0 md:left-64 left-0 z-10">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <h1 className="text-xl font-semibold flex items-center gap-2">
+            <span className="text-2xl">⚙️</span> Machine Status
+          </h1>
+          <div className="flex items-center gap-2">
+            <span className="text-sm bg-white/20 px-3 py-1 rounded-full">Live Monitoring</span>
+          </div>
+        </div>
+      </div>
 
-        {/* Create Form */}
-        {(role === 'admin' || role === 'therapist') && (
-          <form onSubmit={handleCreate} className="flex flex-col md:flex-row gap-4 mb-8">
-            <input
-              type="text"
-              placeholder="Machine Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 transition-shadow shadow-sm hover:shadow-md"
-              required
-            />
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-400 transition-shadow shadow-sm hover:shadow-md"
-            >
-              <option>Offline</option>
-              <option>Running</option>
-              <option>Maintenance</option>
-            </select>
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 disabled:opacity-50 transition-transform transform hover:scale-105 duration-200"
-            >
-              {loading ? 'Adding...' : 'Add Machine'}
-            </button>
-          </form>
-        )}
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-4 pt-20 pb-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Create Form */}
+          {(role === 'admin' || role === 'therapist') && (
+            <form onSubmit={handleCreate} className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <input
+                  type="text"
+                  placeholder="Machine Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#128C7E] focus:border-transparent transition-all duration-200"
+                  required
+                />
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#128C7E] focus:border-transparent transition-all duration-200"
+                >
+                  <option>Offline</option>
+                  <option>Running</option>
+                  <option>Maintenance</option>
+                </select>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-[#128C7E] text-white px-6 py-2 rounded-lg shadow hover:bg-[#075E54] disabled:opacity-50 transition-all duration-200"
+                >
+                  {loading ? 'Adding...' : 'Add Machine'}
+                </button>
+              </div>
+            </form>
+          )}
 
-        {/* Machine Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {machines.map((machine) => (
-            <div
-              key={machine._id}
-              className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-            >
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{machine.name}</h3>
-              <div className="flex items-center justify-between">
-                <span className={`text-white px-3 py-1 rounded-full ${statusColor(machine.status)}`}>  
-                  {machine.status}
-                </span>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 text-red-600">
+              {error}
+            </div>
+          )}
+
+          {/* Machine Grid */}
+          <div className="grid gap-4">
+            {machines.map((machine) => (
+              <div
+                key={machine._id}
+                className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-gray-800">{machine.name}</h3>
+                  <span className={`text-white px-3 py-1 rounded-full ${statusColor(machine.status)}`}>
+                    {machine.status}
+                  </span>
+                </div>
 
                 {(role === 'admin' || role === 'therapist') && (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100">
                     <select
                       value={machine.status}
                       onChange={(e) => handleStatusChange(machine._id, e.target.value)}
-                      className="border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-indigo-400 transition-shadow"
+                      className="border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-[#128C7E] focus:border-transparent transition-all duration-200"
                     >
                       <option>Offline</option>
                       <option>Running</option>
@@ -140,15 +165,15 @@ const MachineStatus = () => {
                     </select>
                     <button
                       onClick={() => handleDelete(machine._id)}
-                      className="text-red-500 hover:text-red-700 transition-transform hover:scale-110"
+                      className="text-red-500 hover:text-red-700 transition-colors duration-200"
                     >
-                      🗑️
+                      🗑️ Delete
                     </button>
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

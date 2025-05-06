@@ -9,11 +9,34 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
 
-  const recognition = window.SpeechRecognition
-    ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
-    : null;
   const userId = JSON.parse(localStorage.getItem('loginResponse'))?.id;
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setNewMessage(prev => prev + ' ' + transcript);
+      };
+
+      recognitionRef.current.onend = () => {
+        setListening(false);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setListening(false);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -40,14 +63,18 @@ export default function Chat() {
   };
 
   const startListening = () => {
-    if (!recognition) return;
-    recognition.start();
-    setListening(true);
-    recognition.onresult = event => {
-      const speech = event.results[0][0].transcript;
-      setNewMessage(prev => prev + ' ' + speech);
-    };
-    recognition.onend = () => setListening(false);
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in your browser.');
+      return;
+    }
+
+    try {
+      recognitionRef.current.start();
+      setListening(true);
+    } catch (error) {
+      console.error('Error starting speech recognition:', error);
+      setListening(false);
+    }
   };
 
   return (
@@ -65,7 +92,7 @@ export default function Chat() {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto px-4 pt-24 pb-28 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 pt-20 pb-8">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <span className="text-6xl mb-4">👋</span>
@@ -130,8 +157,9 @@ export default function Chat() {
             className={`text-[#128C7E] hover:text-[#075E54] p-3 rounded-full hover:bg-gray-100 transition-colors duration-200 ${
               listening ? 'animate-pulse bg-gray-100' : ''
             }`}
+            title={listening ? "Listening..." : "Start voice input"}
           >
-            🎤
+            {listening ? '🎤' : '🎤'}
           </button>
           <button
             onClick={sendMessage}

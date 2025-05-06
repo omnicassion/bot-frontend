@@ -21,7 +21,6 @@ function Chat() {
 
     const fetchChatHistory = async () => {
         try {
-            // const response = await axios.get(`http://localhost:5000/api/chat/history/${userId}`);
             const response = await axios.get(`https://bot-backend-cy89.onrender.com/api/chat/history/${userId}`);
             setMessages(response.data);
         } catch (err) {
@@ -100,69 +99,79 @@ function Chat() {
     };
 
     return (
-       <div className="flex flex-col h-screen bg-white text-black">
-    {/* Header */}
-    <div className="text-center text-xl font-semibold text-blue-700 py-2">
-        👋 Welcome! I'm your Radiation Therapy Assistant
-    </div>
+        <div className="flex flex-col h-screen bg-white text-black">
+            {/* Image Banner */}
+            <div className="">
+                <img
+                    src="/machine.jpg" // <- Save your uploaded image here
+                    alt="Radiation Therapy Machine"
+                    className=" max-h-20 object-cover sm:rounded-b-lg shadow"
+                />
+            </div>
 
-    {/* Chat container */}
-    <div className="flex-1 overflow-y-auto px-4 space-y-4 bg-blue-50">
-        {messages.map((message, index) => (
-            <div
-                key={index}
-                className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}
-            >
-                <div
-                    className={`max-w-sm p-3 rounded-lg ${
-                        message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
-                    }`}
-                >
-                    {message.sender === 'bot' ? (
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
-                    ) : (
-                        message.content
-                    )}
+            {/* Header */}
+            <div className="text-center text-xl font-semibold text-blue-700 py-2">
+                👋 Welcome! I'm your Radiation Therapy Assistant
+            </div>
+
+            {/* Chat container */}
+            <div className="flex-1 overflow-y-auto px-4 space-y-4 bg-blue-50">
+                {messages.map((message, index) => (
+                    <div
+                        key={index}
+                        className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}
+                    >
+                        <div
+                            className={`max-w-sm p-3 rounded-lg ${
+                                message.sender === 'user'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-200 text-gray-800'
+                            }`}
+                        >
+                            {message.sender === 'bot' ? (
+                                <ReactMarkdown>{message.content}</ReactMarkdown>
+                            ) : (
+                                message.content
+                            )}
+                        </div>
+                    </div>
+                ))}
+                {loading && <div className="text-gray-600 italic text-sm">Bot is typing...</div>}
+                {error && <div className="text-red-600 text-sm font-medium">{error}</div>}
+            </div>
+
+            {/* Input Section */}
+            <div className="p-4 bg-white shadow-inner sticky bottom-0 z-10">
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <textarea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Describe your symptoms..."
+                        disabled={loading}
+                        rows={2}
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+
+                    <button
+                        onClick={startListening}
+                        className={`bg-blue-700 hover:bg-blue-700 text-white px-3 rounded-lg ${
+                            listening ? 'animate-pulse' : ''
+                        }`}
+                    >
+                        🎤 {listening ? 'Listening...' : ''}
+                    </button>
+
+                    <button
+                        onClick={sendMessage}
+                        disabled={loading || !newMessage.trim()}
+                        className="bg-blue-700 hover:bg-blue-700 text-white px-3 rounded-lg disabled:opacity-50"
+                    >
+                        {loading ? 'Sending...' : 'Send'}
+                    </button>
                 </div>
             </div>
-        ))}
-        {loading && <div className="text-gray-600 italic text-sm">Bot is typing...</div>}
-        {error && <div className="text-red-600 text-sm font-medium">{error}</div>}
-    </div>
-
-    {/* Input fixed at bottom */}
-    <div className="p-4 bg-white shadow-inner sticky bottom-0 z-10">
-        <div className="flex flex-col sm:flex-row gap-2">
-            <textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Describe your symptoms..."
-                disabled={loading}
-                rows={2}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-
-            <button
-                onClick={startListening}
-                className={`bg-blue-700 hover:bg-blue-700 text-white px-3 rounded-lg ${
-                    listening ? 'animate-pulse' : ''
-                }`}
-            >
-                🎤 {listening ? 'Listening...' : ''}
-            </button>
-
-            <button
-                onClick={sendMessage}
-                disabled={loading || !newMessage.trim()}
-                className="bg-blue-700 hover:bg-blue-700 text-white px-3 rounded-lg disabled:opacity-50"
-            >
-                {loading ? 'Sending...' : 'Send'}
-            </button>
         </div>
-    </div>
-</div>
-
     );
 }
 

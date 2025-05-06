@@ -12,30 +12,26 @@ import AdminDashboard from './components/AdminDashboard';
 import UserTable from './components/UserTable';
 
 function App() {
+  const role = JSON.parse(localStorage.getItem('loginResponse'))?.role;
+
   return (
     <Routes>
-      <Route path="/AdminDashboard" element={<AdminDashboard />} />
-      <Route path="/UserTable" element={<UserTable />} />
-
-     <Route path="/" element={<Home />} />
-
-      {/* Protected Routes under Layout */}
-      <Route element={<Layout />}>
-       {/* Public Route */}
+      {/* Routes WITHOUT Sidebar/Navbar */}
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+
+      {/* Routes WITH Sidebar/Layout */}
+      <Route element={<Layout />}>
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/UserTable" element={<UserTable />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/report" element={<Report />} />
         <Route path="/analyze" element={<ReportAnalysis />} />
-        {/* <Route path="/machine" element={<MachineStatus />} /> */}
-        
-<Route
-  path="/machine"
-  element={
-    JSON.parse(localStorage.getItem('loginResponse'))?.role === 'user'
-      ? <MachineStatusViewOnly />
-      : <MachineStatus />
-  }
-/>
+
+        <Route
+          path="/machine"
+          element={role === 'user' ? <MachineStatusViewOnly /> : <MachineStatus />}
+        />
       </Route>
     </Routes>
   );

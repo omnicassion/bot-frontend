@@ -6,33 +6,38 @@ const ReportAnalysis = () => {
   const [analysis, setAnalysis] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-   const loginResponse = JSON.parse(localStorage.getItem('loginResponse'));
-    const userId = loginResponse?.id;
-
-  const fetchAnalysis = async () => {
-    try {
-      const response = await axios.get(`https://bot-backend-cy89.onrender.com/api/analyze/${userId}`);
-      setAnalysis(response.data.analysis);
-    } catch (err) {
-      setError('Failed to fetch analysis.');
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loginResponse = JSON.parse(localStorage.getItem('loginResponse'));
+  const userId = loginResponse?.id;
 
   useEffect(() => {
+    const fetchAnalysis = async () => {
+      try {
+        const { data } = await axios.get(`https://bot-backend-cy89.onrender.com/api/analyze/${userId}`);
+        setAnalysis(data.analysis);
+      } catch {
+        setError('Failed to fetch analysis.');
+      } finally {
+        setLoading(false);
+      }
+    };
     if (userId) fetchAnalysis();
   }, [userId]);
 
   return (
-    <div className="min-h-screen bg-white px-4 py-6 sm:px-10">
-      <div className="max-w-4xl mx-auto shadow-xl rounded-2xl p-6 border border-gray-200 bg-gray-50">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">🧠 AI Medical Report Analysis</h2>
-        {loading && <p className="text-gray-500">Analyzing report...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+    <div className="min-h-screen bg-white py-8 px-4 sm:px-10">
+      <div className="max-w-4xl mx-auto bg-gray-50 rounded-2xl shadow-lg p-8 animate-slideUp">
+        <h2 className="text-2xl font-extrabold text-gray-800 mb-4 flex items-center">
+          <span className="mr-2 animate-pulse">🧠</span> AI Medical Report Analysis
+        </h2>
+
+        {loading && (
+          <p className="text-gray-500 animate-pulse">Analyzing report...</p>
+        )}
+        {error && (
+          <p className="text-red-500">{error}</p>
+        )}
         {!loading && !error && (
-          <div className="prose max-w-none bg-white p-4 rounded-lg border border-gray-300">
+          <div className="prose prose-lg bg-white p-6 rounded-xl border border-gray-200 shadow-sm transform transition-shadow hover:shadow-lg">
             <ReactMarkdown>{analysis}</ReactMarkdown>
           </div>
         )}

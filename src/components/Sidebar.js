@@ -58,6 +58,10 @@ const Sidebar = () => {
             <Link to="/machine" className={linkClass('/machine')} onClick={() => setIsOpen(false)}>
               Machine Status
             </Link>
+            <Link to="/AdminDashboard" className={linkClass('/AdminDashboard')} onClick={() => setIsOpen(false)}>
+  Admin Dashboard
+</Link>
+
           </nav>
         </div>
 

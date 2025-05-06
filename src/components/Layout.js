@@ -5,44 +5,57 @@ import { Outlet, useNavigate } from 'react-router-dom';
 const Layout = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem('loginResponse');
-    setIsLoggedIn(!!userData);
+    const data = localStorage.getItem('loginResponse');
+    if (data) {
+      setIsLoggedIn(true);
+      setUserData(JSON.parse(data));
+    }
   }, []);
 
   const handleAuthClick = () => {
     if (isLoggedIn) {
-      // Logout
       localStorage.removeItem('loginResponse');
       setIsLoggedIn(false);
+      setUserData(null);
       navigate('/login');
     } else {
-      // Login
       navigate('/login');
     }
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative">
         {/* Navbar */}
-        <nav className="bg-white px-6 py-3 flex justify-between items-center shadow-sm">
-          <h1 className="text-xl font-semibold text-gray-700"></h1>
-          <button
-            onClick={handleAuthClick}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
-          >
-            {isLoggedIn ? 'Logout' : 'Login'}
-          </button>
+        <nav className="bg-gradient-to-r from-[#128C7E] to-[#075E54] px-6 py-4 flex justify-between items-center shadow-lg">
+          <h1 className="text-xl font-semibold text-white"></h1>
+          <div className="flex items-center gap-4">
+            {isLoggedIn && (
+              <div className="flex items-center gap-2 text-white">
+                <span className="text-sm font-medium">{userData?.username}</span>
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  {userData?.username?.charAt(0).toUpperCase()}
+                </div>
+              </div>
+            )}
+            <button
+              onClick={handleAuthClick}
+              className="bg-white hover:bg-gray-100 text-[#128C7E] px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md"
+            >
+              {isLoggedIn ? 'Logout' : 'Login'}
+            </button>
+          </div>
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <Outlet />
         </main>
       </div>

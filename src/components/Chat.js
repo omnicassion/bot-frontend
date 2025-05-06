@@ -16,19 +16,6 @@ export default function Chat() {
   const userId = JSON.parse(localStorage.getItem('loginResponse'))?.id;
 
   useEffect(() => {
-    (async function fetchHistory() {
-      try {
-        const { data } = await axios.get(
-          `https://bot-backend-cy89.onrender.com/api/chat/history/${userId}`
-        );
-        setMessages(data);
-      } catch {
-        // handle error
-      }
-    })();
-  }, [userId]);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -64,75 +51,100 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      {/* Messages */}
-      <div className="flex-1 overflow-auto p-4 space-y-3">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`relative w-auto max-w-2xl px-5 py-3 rounded-lg leading-tight
-                ${msg.sender === 'user'
-                  ? 'bg-green-500 text-white rounded-br-none'
-                  : 'bg-white text-gray-800 rounded-bl-none shadow'}
-              `}
-            >
-              {msg.sender === 'bot' ? (
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
-              ) : (
-                msg.content
-              )}
-              {/* Tail */}
-              <span
-                className={`absolute bottom-0 
-                  ${msg.sender === 'user' ? '-mb-1 right-0' : '-mb-1 left-0'} 
-                  w-3 h-3 bg-transparent`}
-              >
-                <svg
-                  className={msg.sender === 'user' ? 'rotate-45' : '-rotate-45'}
-                  width="14"
-                  height="14"
-                  viewBox="0 0 10 10"
-                  fill={msg.sender === 'user' ? '#22c55e' : '#ffffff'}
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <rect width="10" height="10" />
-                </svg>
-              </span>
-            </div>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#128C7E] to-[#075E54] text-white px-6 py-4 shadow-lg fixed top-0 right-0 md:left-64 left-0 z-10">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <h1 className="text-xl font-semibold flex items-center gap-2">
+            <span className="text-2xl">🩺</span> Medical Assistant
+          </h1>
+          <div className="flex items-center gap-2">
+            <span className="text-sm bg-white/20 px-3 py-1 rounded-full">Online</span>
           </div>
-        ))}
+        </div>
+      </div>
+
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto px-4 pt-24 pb-28 space-y-4">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <span className="text-6xl mb-4">👋</span>
+            <h2 className="text-xl font-semibold mb-2">Welcome to Medical Assistant</h2>
+            <p className="text-center max-w-md">I'm here to help you with your medical queries. How can I assist you today?</p>
+          </div>
+        ) : (
+          messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+            >
+              <div
+                className={`relative max-w-[80%] px-4 py-3 rounded-2xl ${
+                  msg.sender === 'user'
+                    ? 'bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white rounded-br-none'
+                    : 'bg-white text-gray-800 rounded-bl-none shadow-lg'
+                }`}
+              >
+                {msg.sender === 'bot' ? (
+                  <div className="prose prose-sm max-w-none">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  msg.content
+                )}
+                <div
+                  className={`absolute bottom-0 w-4 h-4 ${
+                    msg.sender === 'user'
+                      ? '-right-2 bg-[#25D366]'
+                      : '-left-2 bg-white'
+                  }`}
+                  style={{
+                    clipPath: msg.sender === 'user' 
+                      ? 'polygon(0 0, 100% 100%, 100% 0)'
+                      : 'polygon(0 0, 0 100%, 100% 0)'
+                  }}
+                />
+              </div>
+            </div>
+          ))
+        )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="bg-white p-3 flex items-center gap-2 sticky bottom-0">
-        <textarea
-          rows={1}
-          value={newMessage}
-          onChange={e => setNewMessage(e.target.value)}
-          placeholder="Type a message"
-          className="flex-1 resize-none border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-          onKeyDown={e =>
-            e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage())
-          }
-          disabled={loading}
-        />
-        <button
-          onClick={startListening}
-          className="text-green-500 hover:text-green-600 p-2"
-        >
-          🎤
-        </button>
-        <button
-          onClick={sendMessage}
-          disabled={loading || !newMessage.trim()}
-          className="bg-green-500 text-white p-2 rounded-full disabled:opacity-50"
-        >
-          ➤
-        </button>
+      {/* Input Container */}
+      <div className="fixed bottom-0 right-0 md:left-64 left-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 px-4 py-4">
+        <div className="flex items-center gap-3 max-w-4xl mx-auto">
+          <textarea
+            rows={1}
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            placeholder="Type your medical query..."
+            className="flex-1 resize-none border border-gray-300 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-[#128C7E] focus:border-transparent transition-all duration-200"
+            onKeyDown={e =>
+              e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage())
+            }
+            disabled={loading}
+          />
+          <button
+            onClick={startListening}
+            className={`text-[#128C7E] hover:text-[#075E54] p-3 rounded-full hover:bg-gray-100 transition-colors duration-200 ${
+              listening ? 'animate-pulse bg-gray-100' : ''
+            }`}
+          >
+            🎤
+          </button>
+          <button
+            onClick={sendMessage}
+            disabled={loading || !newMessage.trim()}
+            className="bg-[#128C7E] text-white p-3 rounded-full disabled:opacity-50 hover:bg-[#075E54] transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              '➤'
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

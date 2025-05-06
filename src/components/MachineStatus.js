@@ -83,7 +83,7 @@ const MachineStatus = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#128C7E] to-[#075E54] text-white px-6 py-4 shadow-lg fixed top-0 right-0 md:left-64 left-0 z-10">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
@@ -97,8 +97,8 @@ const MachineStatus = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 pt-20 pb-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="flex-1 w-full overflow-y-auto px-4 pt-20 pb-8">
+        <div className="max-w-4xl mx-auto min-h-[calc(100vh-8rem)]">
           {/* Create Form */}
           {(role === 'admin' || role === 'therapist') && (
             <form onSubmit={handleCreate} className="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -139,7 +139,7 @@ const MachineStatus = () => {
           )}
 
           {/* Machine Grid */}
-          <div className="grid gap-4">
+          <div className="grid gap-4 pb-4">
             {machines.map((machine) => (
               <div
                 key={machine._id}

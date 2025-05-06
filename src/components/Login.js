@@ -6,6 +6,8 @@ function Login() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [zoom, setZoom] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -35,15 +37,15 @@ function Login() {
         localStorage.setItem('loginResponse', JSON.stringify({
           id: data.id,
           username: data.username,
-          email: data.email || '',  // <-- fallback if email is missing
+          email: data.email || '',
           role: data.role,
         }));
 
-        if (data.role === "admin") {
-          navigate("/adminDashboard");
-        } else {
-          navigate("/chat");
-        }
+        setZoom(true);
+
+        setTimeout(() => {
+          navigate(data.role === "admin" ? "/adminDashboard" : "/chat");
+        }, 500);
       } else {
         console.log('Response:', data);
         alert(data.error || 'Error logging in/registering user');
@@ -55,59 +57,103 @@ function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          {isRegistering ? 'Register' : 'Login'}
-        </h2>
+    <>
+      {/* Full-screen Zoom Animation */}
+      {zoom && (
+        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center animate-zoomOut">
+          <img
+            src="/machine.jpg"
+            alt="Zoom Logo"
+            className="w-24 h-24 sm:w-48 sm:h-48 lg:w-64 lg:h-64 rounded-full object-cover"
+          />
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isRegistering && (
-            <input
-              type="email"
-              placeholder="Enter your Email"
-              value={email}
-              required
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+      {/* Login/Register Wrapper */}
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="w-full max-w-sm sm:max-w-md bg-white p-6 sm:p-8 rounded-lg shadow-xl">
+          {/* Logo */}
+          <div className="flex justify-center mb-5 sm:mb-6">
+            <img
+              src="/machine.jpg"
+              alt="Logo"
+              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-full shadow-md"
             />
-          )}
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            required
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-          />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            required
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-          />
+          <h2 className="text-xl sm:text-2xl font-semibold text-center text-gray-800 mb-4 sm:mb-6">
+            {isRegistering ? 'Create Account' : 'Welcome Back'}
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+            {isRegistering && (
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                required
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            )}
+
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              required
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              required
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+
+            <button
+              type="submit"
+              className="w-full py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition duration-200"
+            >
+              {isRegistering ? 'Register' : 'Login'}
+            </button>
+          </form>
 
           <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="mt-4 w-full text-sm text-center text-blue-600 hover:underline"
           >
-            {isRegistering ? 'Register' : 'Login'}
+            {isRegistering
+              ? 'Already have an account? Login'
+              : 'Don’t have an account? Register'}
           </button>
-        </form>
-
-        <button
-          onClick={() => setIsRegistering(!isRegistering)}
-          className="mt-4 text-sm text-blue-600 hover:underline block mx-auto"
-        >
-          {isRegistering
-            ? 'Already have an account? Login'
-            : 'Need an account? Register'}
-        </button>
+        </div>
       </div>
-    </div>
+
+      {/* Tailwind Utility Animation */}
+      <style>{`
+        @layer utilities {
+          @keyframes zoomOut {
+            0% {
+              transform: scale(1);
+              opacity: 1;
+            }
+            100% {
+              transform: scale(5);
+              opacity: 0;
+            }
+          }
+
+          .animate-zoomOut {
+            animation: zoomOut 0.5s ease-out forwards;
+          }
+        }
+      `}</style>
+    </>
   );
 }
 

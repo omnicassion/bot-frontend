@@ -10,6 +10,7 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -52,19 +53,75 @@ export default function Chat() {
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
     setLoading(true);
+    setError(null);
     const text = newMessage;
     setNewMessage('');
     setMessages(prev => [...prev, { content: text, role: 'user' }]);
 
     try {
+      // Validate userId before making the request
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
       const { data } = await axios.post(
         'https://bot-backend-cy89.onrender.com/api/chat/message',
-        { userId, message: text }
+        { 
+          userId, 
+          message: text,
+          isNewChat: messages.length === 0 // Add flag for new chats
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          timeout: 10000 // 10 second timeout
+        }
       );
+      
+      if (!data) {
+        throw new Error('No response received from server');
+      }
+
+      if (!data.response) {
+        throw new Error('Invalid response format from server');
+      }
+      
       setMessages(prev => [...prev, { content: data.response, role: 'bot' }]);
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages(prev => [...prev, { content: 'Sorry, there was an error processing your message.', role: 'bot' }]);
+      let errorMessage = 'Sorry, there was an error processing your message.';
+      
+      if (error.message === 'User not authenticated') {
+        errorMessage = 'Please log in again to continue chatting.';
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          handleLogout();
+        }, 2000);
+      } else if (error.response) {
+        // Server responded with an error
+        if (error.response.status === 401) {
+          errorMessage = 'Session expired. Please log in again.';
+          setTimeout(() => {
+            handleLogout();
+          }, 2000);
+        } else if (error.response.status === 429) {
+          errorMessage = 'Too many requests. Please wait a moment before trying again.';
+        } else {
+          errorMessage = error.response.data?.message || 'Server error occurred. Please try again.';
+        }
+      } else if (error.request) {
+        // Request was made but no response received
+        errorMessage = 'Unable to reach the server. Please check your internet connection.';
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Request timed out. Please try again.';
+      } else if (error.message === 'Invalid response format from server') {
+        errorMessage = 'Received invalid response from server. Please try again.';
+      }
+      
+      setError(errorMessage);
+      setMessages(prev => [...prev, { content: errorMessage, role: 'bot' }]);
     } finally {
       setLoading(false);
     }
@@ -138,6 +195,8 @@ export default function Chat() {
                     className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                       message.role === 'user'
                         ? 'bg-[#128C7E] text-white rounded-br-none'
+                        : message.content.includes('error') || message.content.includes('Error')
+                        ? 'bg-red-50 text-red-600 rounded-bl-none shadow-md'
                         : 'bg-white text-gray-800 rounded-bl-none shadow-md'
                     }`}
                   >

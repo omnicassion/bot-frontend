@@ -1,16 +1,15 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
+import apiService, { apiUtils } from '../services/apiService';
 
 function UserTable() {
   const [data, setData] = useState([]);
 
   const getAllData = async () => {
     try {
-      // const response = await axios.get(`http://localhost:5000/api/adminRoute/userData`);
-      const response = await axios.get(`https://bot-backend-cy89.onrender.com/api/adminRoute/userData`);
+      const response = await apiService.admin.getUserData();
       setData(response.data);
     } catch (error) {
-      console.log(error);
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -20,13 +19,11 @@ function UserTable() {
 
   const updateDataRole = async (id, newRole) => {
     try {
-      const response = await axios.put(`https://bot-backend-cy89.onrender.com/api/adminRoute/updateRole/${id}`, {
-        role: newRole,
-      });
+      const response = await apiService.admin.updateUserRole(id, newRole);
       console.log("Updated role:", response.data);
       getAllData(); // refresh after update
     } catch (error) {
-      console.log(error);
+      console.error('Error updating user role:', error);
     }
   };
 

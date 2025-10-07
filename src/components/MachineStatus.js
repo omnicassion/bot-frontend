@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import apiService, { apiUtils } from '../services/apiService';
 
 const MachineStatus = () => {
   const [machines, setMachines] = useState([]);
@@ -14,12 +15,12 @@ const MachineStatus = () => {
 
   const fetchMachines = async () => {
     try {
-      const response = await fetch('https://bot-backend-cy89.onrender.com/api/machines/get');
-      const data = await response.json();
+      const response = await apiService.machines.getMachines();
+      const data = response.data;
       setMachines(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching machines:', error);
-      setError('Failed to fetch machine status');
+      setError(apiUtils.handleApiError(error, 'Failed to fetch machine status'));
       setMachines([]);
     }
   };
@@ -33,10 +34,10 @@ const MachineStatus = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch('https://bot-backend-cy89.onrender.com/api/machines/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, status, createdBy: tokenData?.username }),
+      await apiService.machines.createMachine({ 
+        name, 
+        status, 
+        createdBy: tokenData?.username 
       });
       setName('');
       setStatus('Offline');
@@ -51,26 +52,22 @@ const MachineStatus = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await fetch(`https://bot-backend-cy89.onrender.com/api/machines/${id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      await apiService.machines.updateMachineStatus(id, newStatus);
       fetchMachines();
     } catch (err) {
       console.error('Status update failed:', err);
-      setError('Failed to update machine status');
+      setError(apiUtils.handleApiError(err, 'Failed to update machine status'));
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this machine?')) return;
     try {
-      await fetch(`https://bot-backend-cy89.onrender.com/api/machines/${id}`, { method: 'DELETE' });
+      await apiService.machines.deleteMachine(id);
       fetchMachines();
     } catch (err) {
       console.error('Delete failed:', err);
-      setError('Failed to delete machine');
+      setError(apiUtils.handleApiError(err, 'Failed to delete machine'));
     }
   };
 

@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
+import apiService, { apiUtils } from '../services/apiService';
 
 function Report() {
   const [report, setReport] = useState('');
   const [loading, setLoading] = useState(true);
-  const loginResponse = JSON.parse(localStorage.getItem('loginResponse')); 
-  const userId = loginResponse?.id;
+  const userId = apiUtils.getUserId();
 
   useEffect(() => {
     const fetchReport = async () => {
       try {
-        const { data } = await axios.get(`https://bot-backend-cy89.onrender.com/api/generate/${userId}`);
+        const { data } = await apiService.reports.generateReport(userId);
         setReport(data.report);
-      } catch {
+      } catch (error) {
+        console.error('Error generating report:', error);
         setReport('Could not generate report. Please try again later.');
       } finally {
         setLoading(false);

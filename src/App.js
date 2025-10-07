@@ -10,31 +10,113 @@ import MachineStatusViewOnly from './components/MachineStatusViewOnly';
 import Home from './components/Home';
 import AdminDashboard from './components/AdminDashboard';
 import UserTable from './components/UserTable';
+import Unauthorized from './components/Unauthorized';
+import ProtectedRoute, { 
+  AdminRoute, 
+  DoctorRoute, 
+  TherapistRoute, 
+  MedicalStaffRoute, 
+  UserRoute,
+  useUserRole 
+} from './components/ProtectedRoute';
+
+// Enhanced Report Components
+import ReportsPage from './components/ReportsPage';
+import AnalysisPage from './components/AnalysisPage';
+import UserManagement from './components/UserManagement';
+import Settings from './components/Settings';
 
 function App() {
-  const role = JSON.parse(localStorage.getItem('loginResponse'))?.role;
-
   return (
     <Routes>
-      {/* Routes WITHOUT Sidebar/Navbar */}
+      {/* Public Routes WITHOUT Sidebar/Navbar */}
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Routes WITH Sidebar/Layout */}
-      <Route element={<Layout />}>
-        <Route path="/AdminDashboard" element={<AdminDashboard />} />
-        <Route path="/UserTable" element={<UserTable />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/report" element={<Report />} />
-        <Route path="/analyze" element={<ReportAnalysis />} />
+      {/* Protected Routes WITH Sidebar/Layout */}
+      <Route element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
+        {/* Admin Only Routes */}
+        <Route path="/admin-dashboard" element={
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        } />
+        
+        <Route path="/user-management" element={
+          <AdminRoute>
+            <UserManagement />
+          </AdminRoute>
+        } />
 
-        <Route
-          path="/machine"
-          element={role === 'user' ? <MachineStatusViewOnly /> : <MachineStatus />}
-        />
+        <Route path="/UserTable" element={
+          <AdminRoute>
+            <UserTable />
+          </AdminRoute>
+        } />
+
+        {/* Medical Staff Routes (Admin, Doctor, Therapist) */}
+        <Route path="/reports" element={
+          <MedicalStaffRoute>
+            <ReportsPage />
+          </MedicalStaffRoute>
+        } />
+
+        <Route path="/analysis" element={
+          <MedicalStaffRoute>
+            <AnalysisPage />
+          </MedicalStaffRoute>
+        } />
+
+        {/* All Authenticated Users */}
+        <Route path="/chat" element={
+          <UserRoute>
+            <Chat />
+          </UserRoute>
+        } />
+
+        <Route path="/report" element={
+          <UserRoute>
+            <Report />
+          </UserRoute>
+        } />
+
+        <Route path="/analyze" element={
+          <TherapistRoute>
+            <ReportAnalysis />
+          </TherapistRoute>
+        } />
+
+        <Route path="/settings" element={
+          <UserRoute>
+            <Settings />
+          </UserRoute>
+        } />
+
+        {/* Machine Status - Role-based component selection */}
+        <Route path="/machine" element={
+          <UserRoute>
+            <MachineStatusWrapper />
+          </UserRoute>
+        } />
       </Route>
     </Routes>
   );
 }
+
+// Wrapper component to choose machine status component based on role
+const MachineStatusWrapper = () => {
+  const userRole = useUserRole();
+  
+  if (userRole === 'user') {
+    return <MachineStatusViewOnly />;
+  }
+  
+  return <MachineStatus />;
+};
 
 export default App;

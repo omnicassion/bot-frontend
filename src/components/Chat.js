@@ -1,8 +1,8 @@
 // src/components/Chat.js
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, Link } from 'react-router-dom';
+import apiService, { apiUtils } from '../services/apiService';
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  const userId = JSON.parse(localStorage.getItem('loginResponse'))?.id;
+  const userId = apiUtils.getUserId();
 
   const handleLogout = () => {
     localStorage.removeItem('loginResponse');
@@ -58,27 +58,33 @@ export default function Chat() {
     setNewMessage('');
     setMessages(prev => [...prev, { content: text, role: 'user' }]);
 
+    // Add a temporary "thinking" message
+    const thinkingMessage = { content: '🤔 AI is thinking...', role: 'bot', isThinking: true };
+    setMessages(prev => [...prev, thinkingMessage]);
+
+    // Set up timeout warning after 15 seconds
+    const timeoutWarning = setTimeout(() => {
+      setMessages(prev => prev.map(msg => 
+        msg.isThinking 
+          ? { ...msg, content: '⏳ This is taking longer than usual. Please wait, the AI is processing your complex request...' }
+          : msg
+      ));
+    }, 15000);
+
     try {
       // Validate userId before making the request
       if (!userId) {
         throw new Error('User not authenticated');
       }
 
-      const { data } = await axios.post(
-        'https://bot-backend-cy89.onrender.com/api/chat/message',
-        { 
-          userId, 
-          message: text,
-          isNewChat: messages.length === 0 // Add flag for new chats
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          timeout: 10000 // 10 second timeout
-        }
+      const { data } = await apiService.chat.sendMessage(
+        userId, 
+        text,
+        messages.length === 1 // Account for the thinking message
       );
+      
+      // Clear the timeout warning
+      clearTimeout(timeoutWarning);
       
       if (!data) {
         throw new Error('No response received from server');
@@ -88,37 +94,23 @@ export default function Chat() {
         throw new Error('Invalid response format from server');
       }
       
-      setMessages(prev => [...prev, { content: data.response, role: 'bot' }]);
+      // Remove the thinking message and add the actual response
+      setMessages(prev => prev.filter(msg => !msg.isThinking).concat({ content: data.response, role: 'bot' }));
     } catch (error) {
       console.error('Error sending message:', error);
-      let errorMessage = 'Sorry, there was an error processing your message.';
       
-      if (error.message === 'User not authenticated') {
-        errorMessage = 'Please log in again to continue chatting.';
-        // Redirect to login after a short delay
+      // Clear the timeout warning and remove thinking message
+      clearTimeout(timeoutWarning);
+      setMessages(prev => prev.filter(msg => !msg.isThinking));
+      
+      // Handle authentication errors specifically
+      if (error.message === 'User not authenticated' || error.response?.status === 401) {
         setTimeout(() => {
           handleLogout();
         }, 2000);
-      } else if (error.response) {
-        // Server responded with an error
-        if (error.response.status === 401) {
-          errorMessage = 'Session expired. Please log in again.';
-          setTimeout(() => {
-            handleLogout();
-          }, 2000);
-        } else if (error.response.status === 429) {
-          errorMessage = 'Too many requests. Please wait a moment before trying again.';
-        } else {
-          errorMessage = error.response.data?.message || 'Server error occurred. Please try again.';
-        }
-      } else if (error.request) {
-        // Request was made but no response received
-        errorMessage = 'Unable to reach the server. Please check your internet connection.';
-      } else if (error.code === 'ECONNABORTED') {
-        errorMessage = 'Request timed out. Please try again.';
-      } else if (error.message === 'Invalid response format from server') {
-        errorMessage = 'Received invalid response from server. Please try again.';
       }
+      
+      const errorMessage = apiUtils.handleApiError(error, 'Sorry, there was an error processing your message.');
       
       setError(errorMessage);
       setMessages(prev => [...prev, { content: errorMessage, role: 'bot' }]);
@@ -195,6 +187,8 @@ export default function Chat() {
                     className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                       message.role === 'user'
                         ? 'bg-[#128C7E] text-white rounded-br-none'
+                        : message.isThinking
+                        ? 'bg-blue-50 text-blue-600 rounded-bl-none shadow-md animate-pulse'
                         : message.content.includes('error') || message.content.includes('Error')
                         ? 'bg-red-50 text-red-600 rounded-bl-none shadow-md'
                         : 'bg-white text-gray-800 rounded-bl-none shadow-md'

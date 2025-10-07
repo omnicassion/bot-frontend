@@ -1,18 +1,77 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, MessageSquare, FileText, BarChart2, Activity, LayoutDashboard } from 'lucide-react';
+import { Menu, X, MessageSquare, FileText, BarChart2, Activity, LayoutDashboard, Users, Settings, Shield } from 'lucide-react';
+import { useUserRole, useUserPermissions } from './ProtectedRoute';
 
 const Sidebar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const userRole = useUserRole();
+  const permissions = useUserPermissions();
 
-  const menuItems = [
-    { path: '/chat', label: 'Chat', icon: <MessageSquare size={20} /> },
-    { path: '/report', label: 'Reports', icon: <FileText size={20} /> },
-    { path: '/analyze', label: 'Analysis', icon: <BarChart2 size={20} /> },
-    { path: '/machine', label: 'Machine Status', icon: <Activity size={20} /> },
-    { path: '/AdminDashboard', label: 'Admin Dashboard', icon: <LayoutDashboard size={20} /> },
+  // Define all possible menu items with their permission requirements
+  const allMenuItems = [
+    { 
+      path: '/chat', 
+      label: 'Chat', 
+      icon: <MessageSquare size={20} />, 
+      roles: ['admin', 'doctor', 'therapist', 'user'],
+      permission: 'canChat'
+    },
+    { 
+      path: '/reports', 
+      label: 'Reports', 
+      icon: <FileText size={20} />, 
+      roles: ['admin', 'doctor', 'therapist', 'user'],
+      permission: 'canViewReports'
+    },
+    { 
+      path: '/analysis', 
+      label: 'Analysis', 
+      icon: <BarChart2 size={20} />, 
+      roles: ['admin', 'doctor', 'therapist'],
+      permission: 'canViewAnalysis'
+    },
+    { 
+      path: '/machine', 
+      label: 'Machine Status', 
+      icon: <Activity size={20} />, 
+      roles: ['admin', 'doctor', 'therapist', 'user'],
+      permission: null // Always show if user has role
+    },
+    { 
+      path: '/admin-dashboard', 
+      label: 'Admin Dashboard', 
+      icon: <LayoutDashboard size={20} />, 
+      roles: ['admin'],
+      permission: 'canViewAdminDashboard'
+    },
+    { 
+      path: '/user-management', 
+      label: 'User Management', 
+      icon: <Users size={20} />, 
+      roles: ['admin'],
+      permission: 'canManageUsers'
+    },
+    { 
+      path: '/settings', 
+      label: 'Settings', 
+      icon: <Settings size={20} />, 
+      roles: ['admin', 'doctor', 'therapist', 'user'],
+      permission: null
+    }
   ];
+
+  // Filter menu items based on user role and permissions
+  const menuItems = allMenuItems.filter(item => {
+    // Check if user has required role
+    if (!item.roles.includes(userRole)) return false;
+    
+    // Check specific permission if defined
+    if (item.permission && !permissions[item.permission]) return false;
+    
+    return true;
+  });
 
   const linkClass = (path) =>
     `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -52,11 +111,19 @@ const Sidebar = () => {
             </button>
           </div>
 
-          {/* For Desktop, just show title */}
+          {/* For Desktop, just show title and user info */}
           <div className="hidden md:block mb-8">
-            <span className="text-2xl font-bold text-[#128C7E] flex items-center gap-2">
+            <span className="text-2xl font-bold text-[#128C7E] flex items-center gap-2 mb-3">
               <span className="text-3xl">🩺</span> Medical Bot
             </span>
+            {userRole && (
+              <div className="bg-gradient-to-r from-[#128C7E]/10 to-[#075E54]/10 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Shield size={16} className="text-[#128C7E]" />
+                  <span className="text-gray-700 capitalize font-medium">{userRole}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Navigation */}

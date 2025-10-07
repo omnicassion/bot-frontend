@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
+import apiService, { apiUtils } from '../services/apiService';
 
 const ReportAnalysis = () => {
   const [analysis, setAnalysis] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const loginResponse = JSON.parse(localStorage.getItem('loginResponse'));
-  const userId = loginResponse?.id;
+  const userId = apiUtils.getUserId();
 
   useEffect(() => {
     const fetchAnalysis = async () => {
       try {
-        const { data } = await axios.get(`https://bot-backend-cy89.onrender.com/api/analyze/${userId}`);
+        const { data } = await apiService.analysis.getAnalysis(userId);
         setAnalysis(data.analysis);
-      } catch {
-        setError('Failed to fetch analysis.');
+      } catch (error) {
+        setError(apiUtils.handleApiError(error, 'Failed to fetch analysis.'));
       } finally {
         setLoading(false);
       }

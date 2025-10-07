@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiService, { apiUtils } from '../services/apiService';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -12,47 +13,37 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const endpoint = isRegistering
-      ? 'https://bot-backend-cy89.onrender.com/api/auth/register'
-      : 'https://bot-backend-cy89.onrender.com/api/auth/login';
+    setLoading(true);
+    setError('');
 
     try {
-      const bodyData = isRegistering
+      const userData = isRegistering
         ? { username, password, email }
         : { username, password };
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bodyData),
-      });
+      const response = isRegistering
+        ? await apiService.auth.register(userData)
+        : await apiService.auth.login(userData);
 
-      const data = await response.json();
+      const data = response.data;
       console.log(data, "data");
 
-      if (response.ok) {
-        localStorage.setItem('loginResponse', JSON.stringify({
-          id: data.id,
-          username: data.username,
-          email: data.email || '',  // <-- fallback if email is missing
-          role: data.role,
-        }));
+      localStorage.setItem('loginResponse', JSON.stringify({
+        id: data.id,
+        username: data.username,
+        email: data.email || '',
+        role: data.role,
+        token: data.token, // Store token if provided
+      }));
 
-        if (data.role === "admin") {
-          navigate("/adminDashboard");
-        } else {
-          navigate("/chat");
-        }
+      if (data.role === "admin") {
+        navigate("/admin-dashboard");
       } else {
-        console.log('Response:', data);
-        setError(data.error || 'Error logging in/registering user');
+        navigate("/chat");
       }
     } catch (error) {
       console.error('Error:', error);
-      setError('Server error');
+      setError(apiUtils.handleApiError(error, 'Error logging in/registering user'));
     } finally {
       setLoading(false);
     }

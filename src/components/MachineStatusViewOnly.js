@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import apiService, { apiUtils } from '../services/apiService';
 
 const MachineStatusViewOnly = () => {
   const [machines, setMachines] = useState([]);
 
   const fetchMachines = async () => {
     try {
-      const response = await fetch('https://bot-backend-cy89.onrender.com/api/machines/get');
-      const data = await response.json();
+      const response = await apiService.machines.getMachines();
+      const data = response.data;
       if (Array.isArray(data)) {
         setMachines(data);
       }

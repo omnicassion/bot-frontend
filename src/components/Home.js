@@ -1,15 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from './Navbar';
 
 const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#128C7E] to-[#075E54] text-white px-6 py-4 shadow-lg">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold">Welcome to Medical Assistant</h1>
-        </div>
-      </div>
+      <Navbar />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-12">

@@ -25,6 +25,7 @@ import ReportsPage from './components/ReportsPage';
 import AnalysisPage from './components/AnalysisPage';
 import UserManagement from './components/UserManagement';
 import Settings from './components/Settings';
+import PIQFormPage from './components/PIQFormPage';
 
 function App() {
   return (
@@ -95,6 +96,13 @@ function App() {
           <UserRoute>
             <Settings />
           </UserRoute>
+        } />
+
+        {/* PIQ Forms - Therapist, Doctor, Admin access */}
+        <Route path="/piq-forms" element={
+          <MedicalStaffRoute>
+            <PIQFormPage />
+          </MedicalStaffRoute>
         } />
 
         {/* Machine Status - Role-based component selection */}

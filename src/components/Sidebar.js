@@ -26,6 +26,13 @@ const Sidebar = () => {
       permission: 'canViewReports'
     },
     { 
+      path: '/piq-forms', 
+      label: 'PIQ Forms', 
+      icon: <FileText size={20} />, 
+      roles: ['admin', 'doctor', 'therapist'],
+      permission: null
+    },
+    { 
       path: '/analysis', 
       label: 'Analysis', 
       icon: <BarChart2 size={20} />, 

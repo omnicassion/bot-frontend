@@ -84,13 +84,22 @@ const ReportsPage = () => {
     setShowViewModal(true);
   };
 
-  const filteredReports = reports.filter(report =>
-    report.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (report.diagnosis && report.diagnosis.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (report.symptoms && report.symptoms.some(symptom => 
-      symptom.toLowerCase().includes(searchTerm.toLowerCase())
-    ))
-  );
+  const getUserName = (report) => {
+    // If user object is populated, use it; otherwise fall back to userId
+    if (report.user && report.user.username) {
+      return report.user.username;
+    }
+    return report.userId;
+  };
+
+  const filteredReports = reports.filter(report => {
+    const userName = getUserName(report);
+    return userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (report.diagnosis && report.diagnosis.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (report.symptoms && report.symptoms.some(symptom => 
+        symptom.toLowerCase().includes(searchTerm.toLowerCase())
+      ));
+  });
 
   const handleDeleteReport = async (reportId) => {
     if (window.confirm('Are you sure you want to delete this report?')) {
@@ -278,7 +287,10 @@ const ReportsPage = () => {
                         <div className="flex items-center gap-3">
                           <User className="w-5 h-5 text-gray-400" />
                           <div>
-                            <div className="font-medium text-gray-900">{report.userId}</div>
+                            <div className="font-medium text-gray-900">{getUserName(report)}</div>
+                            {report.user && report.user.email && (
+                              <div className="text-xs text-gray-500">{report.user.email}</div>
+                            )}
                             <div className="text-sm text-gray-500">
                               {report.symptoms?.length || 0} symptoms
                             </div>
@@ -586,8 +598,14 @@ const ViewReportModal = ({ report, onClose }) => {
           {/* Report Header */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl">
             <div>
-              <label className="text-sm font-medium text-gray-600">Patient ID</label>
-              <p className="text-lg font-semibold text-gray-900">{report.userId}</p>
+              <label className="text-sm font-medium text-gray-600">Patient Information</label>
+              <p className="text-lg font-semibold text-gray-900">{report.user?.username || report.userId}</p>
+              {report.user && report.user.email && (
+                <p className="text-sm text-gray-600">{report.user.email}</p>
+              )}
+              {report.user && report.user.role && (
+                <p className="text-xs text-gray-500 mt-1">Role: {report.user.role}</p>
+              )}
             </div>
             <div>
               <label className="text-sm font-medium text-gray-600">Status</label>

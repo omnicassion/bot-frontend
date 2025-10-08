@@ -264,6 +264,45 @@ export const apiUtils = {
     
     return defaultMessage;
   },
+
+  // PIQ Form APIs
+  piqForms: {
+    // Create new PIQ form
+    createForm: (formData) => apiClient.post('/piq-forms', formData),
+    
+    // Get all PIQ forms with optional filters
+    getAllForms: (params = {}) => apiClient.get('/piq-forms', { params }),
+    
+    // Get specific PIQ form by ID
+    getFormById: (formId) => apiClient.get(`/piq-forms/${formId}`),
+    
+    // Get forms for a specific patient
+    getPatientForms: (patientId) => apiClient.get(`/piq-forms/patient/${patientId}`),
+    
+    // Get forms created by a specific therapist
+    getTherapistForms: (therapistId) => apiClient.get(`/piq-forms/therapist/${therapistId}`),
+    
+    // Update PIQ form
+    updateForm: (formId, formData) => apiClient.put(`/piq-forms/${formId}`, formData),
+    
+    // Delete PIQ form
+    deleteForm: (formId) => apiClient.delete(`/piq-forms/${formId}`),
+    
+    // Submit form (change status to submitted)
+    submitForm: (formId) => apiClient.patch(`/piq-forms/${formId}/submit`),
+    
+    // Review form (change status to reviewed)
+    reviewForm: (formId, reviewData) => apiClient.patch(`/piq-forms/${formId}/review`, reviewData),
+    
+    // Add medication to form
+    addMedication: (formId, medicationData) => apiClient.post(`/piq-forms/${formId}/medication`, medicationData),
+    
+    // Add lab results to form
+    addLabResults: (formId, labData) => apiClient.post(`/piq-forms/${formId}/lab-results`, labData),
+    
+    // Get statistics
+    getStatistics: () => apiClient.get('/piq-forms/stats/overview'),
+  },
 };
 
 export default apiService;

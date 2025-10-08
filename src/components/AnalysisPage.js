@@ -77,15 +77,25 @@ const AnalysisPage = () => {
     }
   };
 
-  const filteredReports = reports.filter(report =>
-    report.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (report.diagnosis && report.diagnosis.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const getUserName = (report) => {
+    // If user object is populated, use it; otherwise fall back to userId
+    if (report.user && report.user.username) {
+      return report.user.username;
+    }
+    return report.userId;
+  };
 
-  const filteredAnalyses = analyses.filter(analysis =>
-    analysis.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (analysis.diagnosis && analysis.diagnosis.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredReports = reports.filter(report => {
+    const userName = getUserName(report);
+    return userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (report.diagnosis && report.diagnosis.toLowerCase().includes(searchTerm.toLowerCase()));
+  });
+
+  const filteredAnalyses = analyses.filter(analysis => {
+    const userName = getUserName(analysis);
+    return userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (analysis.diagnosis && analysis.diagnosis.toLowerCase().includes(searchTerm.toLowerCase()));
+  });
 
   const getAnalysisPreview = (analysisData) => {
     if (!analysisData) return 'No analysis available';
@@ -137,9 +147,15 @@ ${analysis.analysisText ? 'Additional Notes:\n' + analysis.analysisText : ''}
       }
     }
 
+    const userName = getUserName(report);
+    const userEmail = report.user && report.user.email ? report.user.email : 'N/A';
+    const userRole = report.user && report.user.role ? report.user.role : 'N/A';
+    
     const analysisContent = `
 Medical Analysis Report
-Patient ID: ${report.userId}
+Patient Name: ${userName}
+Patient Email: ${userEmail}
+Patient Role: ${userRole}
 Generated: ${new Date().toLocaleString()}
 Status: ${report.status}
 Priority: ${report.priority}
@@ -317,7 +333,12 @@ ${analysisText}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <User className="w-4 h-4 text-gray-500" />
-                          <span className="font-medium text-gray-900">{report.userId}</span>
+                          <span className="font-medium text-gray-900">{getUserName(report)}</span>
+                          {report.user && report.user.role && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                              {report.user.role}
+                            </span>
+                          )}
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             report.priority === 'urgent' ? 'bg-red-100 text-red-800' :
                             report.priority === 'high' ? 'bg-orange-100 text-orange-800' :
@@ -396,7 +417,12 @@ ${analysisText}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <User className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium text-gray-900">{analysis.userId}</span>
+                        <span className="font-medium text-gray-900">{getUserName(analysis)}</span>
+                        {analysis.user && analysis.user.role && (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                            {analysis.user.role}
+                          </span>
+                        )}
                         <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
                           Analyzed
                         </span>
@@ -451,7 +477,7 @@ ${analysisText}
             <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900">
-                  Analysis Results - {selectedReport.userId}
+                  Analysis Results - {getUserName(selectedReport)}
                 </h3>
                 <button
                   onClick={() => setSelectedReport(null)}
@@ -468,7 +494,13 @@ ${analysisText}
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">Report Details</h4>
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Patient ID:</span> {selectedReport.userId}</p>
+                      <p><span className="font-medium">Patient Name:</span> {getUserName(selectedReport)}</p>
+                      {selectedReport.user && selectedReport.user.email && (
+                        <p><span className="font-medium">Email:</span> {selectedReport.user.email}</p>
+                      )}
+                      {selectedReport.user && selectedReport.user.role && (
+                        <p><span className="font-medium">Role:</span> {selectedReport.user.role}</p>
+                      )}
                       <p><span className="font-medium">Status:</span> {selectedReport.status}</p>
                       <p><span className="font-medium">Priority:</span> {selectedReport.priority}</p>
                       <p><span className="font-medium">Diagnosis:</span> {selectedReport.diagnosis || 'Not specified'}</p>
